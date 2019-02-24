@@ -1,26 +1,51 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {
+  ApolloClient,
+  gql,
+  graphql,
+  ApolloProvider,
+} from 'react-apollo';
+
+const client = new ApolloClient();
+
+const channelsListQuery = gql`
+  query ChannelsListQuery {
+    channels {
+      id
+      name
+    }
+  }
+`;
+
+const ChannelsList = ({ data: { loading, error, channels }}) => {
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+  if (error) {
+    return <p>{error.message}</p>;
+  }
+  
+  return <ul className="Item-list">
+    { channels.map(ch => <li key={ch.id}>{ch.name}</li>) }
+    </ul>;
+};
+
+const ChannelsListWithData = graphql(channelsListQuery)(ChannelsList);
 
 class App extends Component {
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <ApolloProvider client={client}>
+        <div className="App">
+          <header className="App-header">
+            <img src={logo} className="App-logo" alt="logo" />
+            <h2>Welcome to Apollo</h2>
+          </header>
+          <ChannelsListWithData />
+        </div>
+      </ApolloProvider>
     );
   }
 }
